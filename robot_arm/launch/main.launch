@@ -1,0 +1,4 @@
+<launch>
+  <node name="ax12_controller" pkg="robot_arm" type="ax_12_controller.py" output="screen"/>
+  <node name="positions_parser" pkg="robot_arm" type="positions_parser.py" output="screen"/>
+</launch>
