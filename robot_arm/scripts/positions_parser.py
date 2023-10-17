@@ -7,8 +7,13 @@ from trajectory_msgs.msg import JointTrajectoryPoint
 from std_msgs.msg import Int16MultiArray
 from std_msgs.msg import Int16
 
-command_pub = rospy.Publisher('/command', Int16, queue_size=10)
+command_pub = rospy.Publisher('/gripstatus', Int16, queue_size=10)
 joint_dict = {'joint0': 0.0, 'joint1': 0.0, 'joint2': 0.0, 'joint3': 0.0, 'joint4': 0.0, 'joint5': 0.0}
+
+
+def update_dict(data):
+    global joint_dict
+    joint_dict['joint5'] = data.position[-1]
 
 def display_planned_path_callback(data, joint_state_publisher):
     # Create a dictionary with default values for all joints
@@ -56,6 +61,8 @@ def main():
                      display_planned_path_callback,
                      callback_args=joint_state_publisher)
     
+    rospy.Subscriber('/joint_states/goal', JointState, update_dict)
+
     rospy.spin()
 
 if __name__ == '__main__':
