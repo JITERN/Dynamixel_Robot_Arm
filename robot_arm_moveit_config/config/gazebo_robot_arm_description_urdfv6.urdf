@@ -254,7 +254,7 @@
     </joint>
     <link name="grip_point" />
     <joint name="grip_fixed" type="fixed">
-        <origin xyz="-0.060 0.097 0.0285" rpy="1.5708 1.5708 0" />
+        <origin xyz="-0.060 0.097 0.0285" rpy="-1.5708 0 0" />
         <parent link="link5" />
         <child link="grip_point" />
     </joint>

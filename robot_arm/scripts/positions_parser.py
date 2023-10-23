@@ -8,7 +8,7 @@ from std_msgs.msg import Int16MultiArray
 from std_msgs.msg import Int16
 
 command_pub = rospy.Publisher('/gripstatus', Int16, queue_size=10)
-joint_dict = {'joint0': 0.0, 'joint1': 0.0, 'joint2': 0.0, 'joint3': 0.0, 'joint4': 0.0, 'joint5': 0.0}
+joint_dict = {'joint0': 0.0, 'joint1': 0.0, 'joint2': 0.0, 'joint3': 0.0, 'joint4': 0.0, 'joint5': 0.32}
 
 
 def update_dict(data):
@@ -30,8 +30,13 @@ def display_planned_path_callback(data, joint_state_publisher):
         joint_positions = last_waypoint.positions   
         joint_names = data.trajectory[0].joint_trajectory.joint_names # ["joint0", ""]
 
+        print(len(joint_positions))
         if len(joint_positions) == 1:
-            command_pub.publish(8)
+            if joint_positions[0] > 0.33: #gripper close
+                command_pub.publish(1)
+            else:
+                command_pub.publish(2) #gripper open
+
 
         # Update the dictionary with the available joint positions
         for joint_name, position in zip(joint_names, joint_positions):

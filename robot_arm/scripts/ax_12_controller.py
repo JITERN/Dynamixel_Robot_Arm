@@ -4,6 +4,7 @@ import rospy
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Int16
 from std_msgs.msg import Int16MultiArray
+from std_msgs.msg import String
 
 # e.g 'COM3' windows or '/dev/ttyUSB0' for Linux
 Ax12.DEVICENAME = '/dev/ttyUSB0'
@@ -17,7 +18,7 @@ motor_ids = [1,2,3,4,5,6]
 motors = [Ax12(motor_id) for motor_id in motor_ids]
 goal_pos = []
 got_loads = False
-got_gripper_load = False
+is_gripping = False
 loads = []
 
 rospy.init_node('ax12_controller')
@@ -33,8 +34,13 @@ def extract_data(data):
             goal_pos.append(int(((pos + 2.61) / (2 * 2.61)) * 1023))
 
 def get_gripper_load(data):
-    global got_gripper_load
-    got_gripper_load = True
+    global is_gripping
+    print(data.data)
+    if data.data == 1: #gripper close
+        is_gripping = True
+    else:
+        is_gripping = False
+
 
 
 # Subscribe to the '/joint_states/goal' topic
@@ -45,14 +51,14 @@ rospy.Subscriber('/gripstatus', Int16, get_gripper_load)
 joint_state_pub = rospy.Publisher('move_group/joint_states', JointState, queue_size=10)
 load_pub = rospy.Publisher('/load', Int16MultiArray, queue_size=10)
 gripper_stop_pos = rospy.Publisher('/joint_states/goal', JointState, queue_size=10)
-
+object_size = rospy.Publisher('/obj_size', String, queue_size=10)
 
 def main(motors):
     """ sets goal position based on user input """
     global goal_pos
     global loads
     global got_loads
-    global got_gripper_load
+    global is_gripping
     for motor in motors:
         #motor.set_cw_compliance_slope(128)
         #motor.set_ccw_compliance_slope(128)
@@ -70,19 +76,27 @@ def main(motors):
         else:
             positions = [(((i.get_present_position()/ 1023) * (2 * 2.61)) - 2.61) for i in motors]
             #print("\nCurrent Positions: %s" % ', '.join(map(str, positions)))
-            max_load = 150
+            max_load = 150 +1024
             current_load = motors[-1].get_load()
-            if current_load > max_load and current_load < 1024 and got_gripper_load is True:
+            print(current_load, is_gripping)
+            if current_load > max_load and current_load > 1023 and is_gripping is True:
                 joint_state_msg.position[-1] = positions[-1]
                 gripper_stop_pos.publish(joint_state_msg)
                 block_size = positions[-1]
-                if block_size > -1 and block_size < 1:
-                    print("Big Dick")
-                elif block_size <= -1 and block_size > -1.5:
-                    print("Small Dick")
+                obj_size = String()
+                if block_size > 0 and block_size < 1:
+                    obj_size.data = "Big DICK"
+                    object_size.publish(obj_size)
+                    print("Big")
+                elif block_size >= 1 and block_size < 1.5:
+                    obj_size.data = "SMall DICK"
+                    object_size.publish(obj_size)
+                    print("Small")
                 else:
-                    print("NO Dick")
-                got_gripper_load = False
+                    obj_size.data = "No DICK"
+                    object_size.publish(obj_size)
+                    print("NO")
+                is_gripping = False
             
             # Publish motor positions to /joint_states topic
             joint_state_msg = JointState()
@@ -94,16 +108,35 @@ def main(motors):
             joint_state_pub.publish(joint_state_msg)
         
         # FOR DEBUG USE
-        # if got_loads:
-        #     for motor in motors:
-        #         loads.append(motor.get_load())
-        #     print(loads)
-        #     load_arr = Int16MultiArray()
-        #     load_arr.data = loads
-        #     load_pub.publish(load_arr)
-        #     got_loads = False
-        #     loads = []
-            
+        if got_loads:
+            sum = 0
+            for motor in motors[:-1]:
+                loads.append(motor.get_load())
+                sum += motor.get_load()
+            if sum > 1400:
+                print("HEAVY")
+            else:
+                print("LIGHT")
+            print(loads)
+            load_arr = Int16MultiArray()
+            load_arr.data = loads
+            load_pub.publish(load_arr)
+            got_loads = False
+            loads = []
+        
+        ### HANS DYNAMIC ###
+        ### CALIBRATION ###
+        # Joint orien  (0 0 0 -90 0)
+        # 0 128 128 1120 0 0  empty
+        # [0, 96, 128, 1152, 0, 0] empty2    1376
+
+        # [0, 96, 64, 1088, 0, 96]   light  1344
+        # [0, 96, 64, 1080, 0, 96]  light2   1336
+        # [0, 128, 96, 1120, 0, 96] heavy  1440
+        # [0, 128, 128, 1120, 0, 96]    heavy2  1472
+
+
+# [0, 96, 128, 1152, 0] empty
         rate.sleep()
 
 if __name__ == '__main__':
