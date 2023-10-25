@@ -20,6 +20,7 @@ goal_pos = []
 got_loads = False
 is_gripping = False
 loads = []
+object_status_str = ""
 
 rospy.init_node('ax12_controller')
 
@@ -52,6 +53,7 @@ joint_state_pub = rospy.Publisher('move_group/joint_states', JointState, queue_s
 load_pub = rospy.Publisher('/load', Int16MultiArray, queue_size=10)
 gripper_stop_pos = rospy.Publisher('/joint_states/goal', JointState, queue_size=10)
 object_size = rospy.Publisher('/obj_size', String, queue_size=10)
+object_status_pub = rospy.Publisher('/obj_status', String, queue_size=10)
 
 def main(motors):
     """ sets goal position based on user input """
@@ -59,6 +61,8 @@ def main(motors):
     global loads
     global got_loads
     global is_gripping
+    global object_size
+    global object_status
     for motor in motors:
         #motor.set_cw_compliance_slope(128)
         #motor.set_ccw_compliance_slope(128)
@@ -76,26 +80,31 @@ def main(motors):
         else:
             positions = [(((i.get_present_position()/ 1023) * (2 * 2.61)) - 2.61) for i in motors]
             #print("\nCurrent Positions: %s" % ', '.join(map(str, positions)))
-            max_load = 150 +1024
+            max_load = 200
             current_load = motors[-1].get_load()
-            print(current_load, is_gripping)
-            if current_load > max_load and current_load > 1023 and is_gripping is True:
+            if current_load > 1023 and current_load < 2048:
+                current_load = current_load - 1024
+            # print(current_load, is_gripping)
+            if current_load > max_load and is_gripping is True:
                 joint_state_msg.position[-1] = positions[-1]
                 gripper_stop_pos.publish(joint_state_msg)
                 block_size = positions[-1]
                 obj_size = String()
                 if block_size > 0 and block_size < 1:
-                    obj_size.data = "Big DICK"
-                    object_size.publish(obj_size)
+                    # obj_size.data = "Big"
+                    # object_size.publish(obj_size)
                     print("Big")
+                    object_status_str = "big,"
                 elif block_size >= 1 and block_size < 1.5:
-                    obj_size.data = "SMall DICK"
-                    object_size.publish(obj_size)
+                    # obj_size.data = "SMall"
+                    # object_size.publish(obj_size)
                     print("Small")
+                    object_status_str = "small,"
                 else:
-                    obj_size.data = "No DICK"
-                    object_size.publish(obj_size)
+                    # obj_size.data = "No"
+                    # object_size.publish(obj_size)
                     print("NO")
+                    object_status_str = "no,"
                 is_gripping = False
             
             # Publish motor positions to /joint_states topic
@@ -115,8 +124,16 @@ def main(motors):
                 sum += motor.get_load()
             if sum > 1400:
                 print("HEAVY")
+                object_status_str += "heavy"
+                print (object_status_str)
             else:
                 print("LIGHT")
+                object_status_str += "light"
+                print (object_status_str)
+
+            obj_status = String()
+            obj_status.data = object_status_str
+            object_status_pub.publish(obj_status)
             print(loads)
             load_arr = Int16MultiArray()
             load_arr.data = loads
@@ -136,7 +153,14 @@ def main(motors):
         # [0, 128, 128, 1120, 0, 96]    heavy2  1472
 
 
-# [0, 96, 128, 1152, 0] empty
+# [0, 96, 128, 1152, 0] empty 1376
+# [0, 96, 128, 1120, 0] empty 1344
+# [0, 128, 96, 1120, 0] heavy 1344
+# [0, 128, 96, 1088, 0] heavy 1312
+# [0, 96, 64, 1088, 0] light 1248
+
+
+
         rate.sleep()
 
 if __name__ == '__main__':

@@ -80,7 +80,7 @@
         <origin xyz="0 0.0415 0" rpy="0 0 0" />
         <parent link="link1" />
         <child link="link2" />
-        <axis xyz="0 0 1" />
+        <axis xyz="0 0 -1" />
         <limit lower="-2.61" upper="2.61" effort="0" velocity="0" />
     </joint>
     <link name="link3">
@@ -250,7 +250,7 @@
         <parent link="link5" />
         <child link="gripperindication" />
         <axis xyz="0 -1 0" />
-        <limit lower="-2.61" upper="0" effort="0" velocity="0" />
+        <limit lower="0" upper="2.61" effort="0" velocity="0" />
     </joint>
     <link name="grip_point" />
     <joint name="grip_fixed" type="fixed">
