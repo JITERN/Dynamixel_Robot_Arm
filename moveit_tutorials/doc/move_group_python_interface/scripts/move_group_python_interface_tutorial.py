@@ -53,6 +53,7 @@ import moveit_commander
 import moveit_msgs.msg
 import geometry_msgs.msg
 import rospy
+import time
 from std_msgs.msg import String
 from std_msgs.msg import Int16
 
@@ -752,6 +753,13 @@ def callback(data) :
 def color_detected(data) :
     global color
     color = data.data
+    print("color is: ", color)
+
+def object_detected(data) :
+    global strain_gauge, object_ready
+    strain_gauge = data.data
+    print("strain gauge is: ", strain_gauge)
+    object_ready = True
 
 
 def main():
@@ -765,13 +773,17 @@ def main():
     #         "============ Press `Enter` to begin the tutorial by setting up the moveit_commander ..."
         # )
         global size,weight
-        global color
+        global color, strain_gauge
+        global object_ready
+
+        object_ready = False
         
         tutorial = MoveGroupPythonInterfaceTutorial()
         pub = rospy.Publisher("/command", Int16, queue_size=10)
         sub = rospy.Subscriber("/obj_status", String, callback)  
         ready_color_detection = rospy.Publisher("/ready_color_detection", Int16, queue_size=10)
-        color_sub = rospy.Subscriber("/color", String, color_detected)  
+        color_sub = rospy.Subscriber("/color", String, color_detected) 
+        strain_gauge_sub = rospy.Subscriber("/pickup_avail", String, object_detected) 
 
 
 
@@ -781,6 +793,11 @@ def main():
         # gripper --->[j5]
         
         while True:
+            size = ""
+            weight = ""
+            color = ""
+            strain_gauge = ""
+
             move_group = moveit_commander.MoveGroupCommander("arm_no_grip")
             gripper_group = moveit_commander.MoveGroupCommander("gripper")
             move_group.set_named_target("home")
@@ -788,8 +805,11 @@ def main():
             gripper_group.set_named_target("gripper_open")
             gripper_group.go(wait=True)
 
-            input("Press 'Enter' to start execute if load is ready.")
-        
+            print("Please place load on loading bay.")
+            while object_ready == False:
+                # print("waiting for object")
+                time.sleep(1)
+
             move_group.set_named_target("pickup_1")
             move_group.go(wait=True)
 
@@ -800,14 +820,15 @@ def main():
 
             move_group.set_named_target("measure_weight")
             move_group.go(wait=True)
-            size = ""
-            weight = ""
-            color = ""
             pub.publish(0)
+            object_ready = False
+            print("ready for next load")
 
-            while len(size) == 0:
+            while len(size) == 0 or len(size) == 0 or len(color) == 0:
                 pass
-            
+            print(weight)
+            print(size)
+            print(color)
             if color == "BLUE":
                 print("Color is BLUE.")
                 if weight == "heavy":
@@ -893,11 +914,17 @@ def main():
                         print("size is not big or small-->",size)
                 else:
                     print("weight is not heavy or light-->",weight)
-            user_input = input("Press 'Q' to exit, press 'Enter' to execute robot arm if next load is ready: ")
 
-            if user_input.lower() == "q":
-                print("good bye")
-                break
+            move_group.set_named_target("home")
+            move_group.go(wait=True)
+            gripper_group.set_named_target("gripper_open")
+            gripper_group.go(wait=True)
+            
+            # user_input = input("Press 'Q' to exit, press 'Enter' to execute robot arm if next load is ready: ")
+
+            # if user_input.lower() == "q":
+            #     print("good bye")
+            #     break
 
 
 

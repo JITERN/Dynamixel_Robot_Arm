@@ -72,7 +72,8 @@ def main():
     ready = False  # Signal from robot arm
     scaling_factor = 0.5
     # image = cv2.imread(args["image"])
-    url = 'http://192.168.171.181/cam-hi.jpg'
+    url = 'http://192.168.32.181/cam-hi.jpg'
+
 
     while not rospy.is_shutdown():
         # ret, frame = cap.read()

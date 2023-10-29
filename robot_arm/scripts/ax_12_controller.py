@@ -7,7 +7,7 @@ from std_msgs.msg import Int16MultiArray
 from std_msgs.msg import String
 
 # e.g 'COM3' windows or '/dev/ttyUSB0' for Linux
-Ax12.DEVICENAME = '/dev/ttyUSB0'
+Ax12.DEVICENAME = '/dev/ttyUSB1'
 
 Ax12.BAUDRATE = 1_000_000
 
@@ -84,10 +84,15 @@ def main(motors):
             current_load = motors[-1].get_load()
             if current_load > 1023 and current_load < 2048:
                 current_load = current_load - 1024
-            # print(current_load, is_gripping)
+            print(current_load, is_gripping)
             if current_load > max_load and is_gripping is True:
+                print(current_load)          
+                print("FORCE STOP")
                 joint_state_msg.position[-1] = positions[-1]
                 gripper_stop_pos.publish(joint_state_msg)
+                print(joint_state_msg)          
+                print("moved")
+                print(joint_state_msg)          
                 block_size = positions[-1]
                 obj_size = String()
                 if block_size > 0 and block_size < 1:
