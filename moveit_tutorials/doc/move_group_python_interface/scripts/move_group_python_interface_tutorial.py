@@ -872,8 +872,8 @@ def main():
                 else:
                     print("weight is not heavy or light-->",weight)
 
-            elif color == "LIGHT_GRAY":
-                print("Color is LIGHT_GRAY.")
+            elif color == "RED":
+                print("Color is RED.")
                 if weight == "heavy":
                     print("Weight is heavy.")
                     if size == "big":
