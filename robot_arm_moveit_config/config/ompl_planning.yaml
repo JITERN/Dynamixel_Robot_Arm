@@ -195,7 +195,6 @@ arm_no_grip:
     - BITstar
 gripper:
   planner_configs:
-    - planning
     - AnytimePathShortening
     - SBL
     - EST

@@ -159,7 +159,7 @@ catkin_install_python(PROGRAMS
   scripts/interface_node.py
   scripts/ax_12_controller.py
   scripts/moveit_controller_bridge.py
-  scripts/hardware_interface.py
+  scripts/color_detection.py
   scripts/positions_parser.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

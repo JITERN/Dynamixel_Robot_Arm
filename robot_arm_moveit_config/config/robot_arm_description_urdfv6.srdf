@@ -10,13 +10,7 @@
     <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
     <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
     <group name="arm_no_grip">
-        <joint name="fixed_joint"/>
-        <joint name="joint0"/>
-        <joint name="joint1"/>
-        <joint name="joint2"/>
-        <joint name="joint3"/>
-        <joint name="joint4"/>
-        <joint name="grip_fixed"/>
+        <chain base_link="world" tip_link="grip_point"/>
     </group>
     <group name="gripper">
         <joint name="joint5"/>
@@ -29,19 +23,84 @@
         <joint name="joint3" value="0"/>
         <joint name="joint4" value="0"/>
     </group_state>
-    <group_state name="goal1" group="arm_no_grip">
+    <group_state name="pickup_1" group="arm_no_grip">
         <joint name="joint0" value="0"/>
-        <joint name="joint1" value="-0.157"/>
-        <joint name="joint2" value="1.3264"/>
-        <joint name="joint3" value="-1.6402"/>
-        <joint name="joint4" value="0.0428"/>
+        <joint name="joint1" value="-0.0143"/>
+        <joint name="joint2" value="1.4405"/>
+        <joint name="joint3" value="-1.6116"/>
+        <joint name="joint4" value="0"/>
+    </group_state>
+    <group_state name="measure_weight" group="arm_no_grip">
+        <joint name="joint0" value="0"/>
+        <joint name="joint1" value="0"/>
+        <joint name="joint2" value="0"/>
+        <joint name="joint3" value="-1.57"/>
+        <joint name="joint4" value="0"/>
+    </group_state>
+    <group_state name="goal_1" group="arm_no_grip">
+        <joint name="joint0" value="-1.57"/>
+        <joint name="joint1" value="-1.0383"/>
+        <joint name="joint2" value="1.7834"/>
+        <joint name="joint3" value="-1.7885"/>
+        <joint name="joint4" value="0.0128"/>
+    </group_state>
+    <group_state name="goal_4" group="arm_no_grip">
+        <joint name="joint0" value="1.57"/>
+        <joint name="joint1" value="-1.0383"/>
+        <joint name="joint2" value="1.7833"/>
+        <joint name="joint3" value="-1.7885"/>
+        <joint name="joint4" value="0.0128"/>
+    </group_state>
+    <group_state name="goal_2" group="arm_no_grip">
+        <joint name="joint0" value="-1.5027"/>
+        <joint name="joint1" value="-0.0229"/>
+        <joint name="joint2" value="1.1098"/>
+        <joint name="joint3" value="-1.161"/>
+        <joint name="joint4" value="-0.0586"/>
+    </group_state>
+    <group_state name="goal_3" group="arm_no_grip">
+        <joint name="joint0" value="1.57"/>
+        <joint name="joint1" value="-0.0229"/>
+        <joint name="joint2" value="1.1098"/>
+        <joint name="joint3" value="-1.161"/>
+        <joint name="joint4" value="-0.0586"/>
     </group_state>
     <group_state name="gripper_open" group="gripper">
-        <joint name="joint5" value="0"/>
+        <joint name="joint5" value="0.32"/>
     </group_state>
     <group_state name="gripper_close" group="gripper">
-        <joint name="joint5" value="-0.927"/>
+        <joint name="joint5" value="2.61"/>
     </group_state>
+    <group_state name="goal_7" group="arm_no_grip">
+        <joint name="joint0" value="0.8415"/>
+        <joint name="joint1" value="0.5277"/>
+        <joint name="joint2" value="0.6703"/>
+        <joint name="joint3" value="-1.1838"/>
+        <joint name="joint4" value="0.0143"/>
+    </group_state>
+    <group_state name="goal_8" group="arm_no_grip">
+        <joint name="joint0" value="-0.8415"/>
+        <joint name="joint1" value="0.5277"/>
+        <joint name="joint2" value="0.6703"/>
+        <joint name="joint3" value="-1.1838"/>
+        <joint name="joint4" value="0.0143"/>
+    </group_state>
+    <group_state name="goal_5" group="arm_no_grip">
+        <joint name="joint0" value="0.8415"/>
+        <joint name="joint1" value="-1.0383"/>
+        <joint name="joint2" value="1.7834"/>
+        <joint name="joint3" value="-1.7885"/>
+        <joint name="joint4" value="0.0128"/>
+    </group_state>
+    <group_state name="goal_6" group="arm_no_grip">
+        <joint name="joint0" value="-0.8415"/>
+        <joint name="joint1" value="-1.0383"/>
+        <joint name="joint2" value="1.7834"/>
+        <joint name="joint3" value="-1.7885"/>
+        <joint name="joint4" value="0.0128"/>
+    </group_state>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="gripper" parent_link="grip_point" group="arm_no_grip"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="base_link" link2="link1" reason="Adjacent"/>
     <disable_collisions link1="gripperindication" link2="link4" reason="Never"/>
